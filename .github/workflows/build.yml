@@ -34,4 +34,4 @@ jobs:
       
       - name: Memcheck
         run: |
-          valgrind --error-exicode=1 ./alltests
+          valgrind --error-exitcode=1 ./build/alltests

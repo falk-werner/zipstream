@@ -10,6 +10,7 @@
 #include <vector>
 #include <stdexcept>
 
+#include <cinttypes>
 
 namespace
 {

@@ -159,6 +159,22 @@ size_t stream::read(char * buffer, size_t buffer_size)
 
 void stream::skip(size_t count)
 {
+    char buffer[buffer_size];
+
+    size_t remaining = count;
+    while (remaining > 0)
+    {
+        size_t const chunk_size = std::min(remaining, buffer_size);
+        size_t const bytes_read = read(buffer, chunk_size);
+        if (bytes_read == 0)
+        {
+            // end of stream
+            break;
+        }
+
+        remaining -= bytes_read;
+    }
+
     throw std::runtime_error("not implemented");
 }
 

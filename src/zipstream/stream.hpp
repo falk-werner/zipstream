@@ -13,10 +13,11 @@ namespace zipstream
 enum class state
 {
     init,
-    write_local_header,
-    write_local_data,
-    write_central_header,
-    write_central_end,
+    file_header,
+    file_data,
+    data_descriptor,
+    toc_entry,
+    toc_end,
     done
 };
 
@@ -31,6 +32,13 @@ public:
     void reset() override;
 
 private:
+    void process_init();
+    void process_file_header(char * buffer, size_t buffer_size, size_t & pos);
+    void process_file_data(char * buffer, size_t buffer_size, size_t & pos);
+    void process_data_descriptor(char * buffer, size_t buffer_size, size_t & pos);
+    void process_toc_entry(char * buffer, size_t buffer_size, size_t & pos);
+    void process_toc_end(char * buffer, size_t buffer_size, size_t & pos);
+
     std::vector<entry> m_entries;
 
     buffer m_buffer;

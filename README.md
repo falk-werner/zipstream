@@ -52,7 +52,6 @@ deleted or truncated) or in corrupt archives (if the file is modified).
 - use corrent file date and time
 - compress files using deflate
 - create zip64 archives
-- add github build workflow
 - add more unit tests
 - add options to opt out creating unit tests
 

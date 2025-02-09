@@ -1,0 +1,37 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install libgtest-dev libgmock-dev valgrind
+      
+      - name: Configure
+        run: |
+          cmake -B build CMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        run: |
+          cmake --build build
+
+      - name: Unit Test
+        run: |
+          ctest --test-dir build
+      
+      - name: Memcheck
+        run: |
+          valgrind --error-exicode=1 ./alltests

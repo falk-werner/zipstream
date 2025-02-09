@@ -1,3 +1,5 @@
+[![Build](https://github.com/falk-werner/zipstream/actions/workflows/build.yml/badge.svg)](https://github.com/falk-werner/zipstream/actions/workflows/build.yml)
+
 # zipstream
 
 C++ library to create ZIP archives on the fly.

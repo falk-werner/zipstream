@@ -86,14 +86,15 @@ uint32_t crc32sum::from_string(std::string const & value)
 uint32_t crc32sum::from_file(std::string const & filename)
 {
     crc32sum checksum;
-    std::ifstream stream;
+    std::ifstream stream(filename);
     while (stream.good())
     {
         constexpr size_t const buffer_size = 100 * 1024;
         char buffer[buffer_size];
         stream.read(buffer, buffer_size);
+        auto const count = stream.gcount();
 
-        checksum.update(buffer, stream.gcount());
+        checksum.update(buffer, count);
     }
 
     if (stream.bad())

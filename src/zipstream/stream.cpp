@@ -16,30 +16,6 @@ namespace
 
 constexpr size_t const buffer_size = 100 * 1024;
 
-void write_u32(std::ofstream & file, uint32_t value)
-{
-    uint8_t data[4];
-    for(size_t i = 0; i < 4; i++)
-    {
-        data[i] = static_cast<uint8_t>(value & 0xff);
-        value >>= 8;
-    }
-    file.write(reinterpret_cast<char*>(data), 4);
-}
-
-void write_u16(std::ofstream & file, uint16_t value)
-{
-    auto const low = static_cast<uint8_t>(value & 0xff);
-    auto const high = static_cast<uint8_t>((value >> 8) & 0xff);    
-    uint8_t data[] = { low, high };
-    file.write(reinterpret_cast<char *>(data), 2);
-}
-
-void write_string(std::ofstream & file, std::string const & value)
-{
-    file.write(value.data(), value.size());
-}
-
 uint32_t compute_checksum(entry const &e)
 {
     switch (e.type)
@@ -65,30 +41,6 @@ uint32_t get_size(entry const &e)
             return e.value.size();
         case entry_type::file_from_path:
             return std::filesystem::file_size(e.value);
-        default:
-            throw std::runtime_error("internal error: unknown entry type");
-    }
-}
-
-void write_content(std::ofstream & file, entry const &e)
-{
-    switch (e.type)
-    {
-        case entry_type::directory:
-            // nothing to write
-            break;
-        case entry_type::file_with_content:
-            write_string(file, e.value);
-            break;
-        case entry_type::file_from_path:
-            {
-                std::ifstream infile(e.value);
-                file << infile.rdbuf();
-                if (infile.fail())
-                {
-                    throw std::runtime_error("failed to read file");
-                }
-            }
         default:
             throw std::runtime_error("internal error: unknown entry type");
     }

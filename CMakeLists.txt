@@ -7,7 +7,10 @@ add_library(zipstream STATIC
     src/zipstream/builder.cpp
     src/zipstream/crc32sum.cpp
     src/zipstream/stream.cpp
-    src/zipstream/buffer.cpp)
+    src/zipstream/buffer.cpp
+    src/zipstream/entries/dir_entry.cpp
+    src/zipstream/entries/static_file_entry.cpp
+    src/zipstream/entries/file_entry.cpp)
 target_include_directories(zipstream PUBLIC inc)
 target_include_directories(zipstream PRIVATE src)
 

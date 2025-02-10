@@ -129,16 +129,21 @@ void stream::process_file_header(char * buffer, size_t buffer_size, size_t & pos
     {
         auto & entry = m_entries.at(m_current_entry);
         entry.offset = m_pos;
+        bool data_descriptor_needed = entry.data_descriptor_needed();
+        uint16_t const flags = (data_descriptor_needed) ? 0x08 : 0x00;
+        uint32_t const crc32 = (data_descriptor_needed) ? 0 : entry.crc32();
+        uint32_t const size = (data_descriptor_needed) ? 0 : entry.size();
+        
 
         m_buffer.write_u32(0x04034b50);             // signatue
         m_buffer.write_u16(10);                     // version needed (default=1.0)
-        m_buffer.write_u16(0);                      // flags (none)
+        m_buffer.write_u16(flags);                  // flags 
         m_buffer.write_u16(0);                      // compression method (store)
         m_buffer.write_u16(0);                      // ToDo: file time
         m_buffer.write_u16(0);                      // ToDo: file data
-        m_buffer.write_u32(entry.crc32());          // crc32
-        m_buffer.write_u32(entry.size());           // compressesd size
-        m_buffer.write_u32(entry.size());           // uncompressed size
+        m_buffer.write_u32(crc32);                  // crc32
+        m_buffer.write_u32(size);                   // compressesd size
+        m_buffer.write_u32(size);                   // uncompressed size
         m_buffer.write_u16(entry.name().size());    // filename length
         m_buffer.write_u16(0);                      // extra field length
         m_buffer.write_str(entry.name());           // filename                                        
@@ -161,20 +166,45 @@ void stream::process_file_data(char * buffer, size_t buffer_size, size_t & pos)
     auto & entry = m_entries.at(m_current_entry);
 
     auto const count = entry.read_at(m_data_pos, &buffer[pos], buffer_size - pos);
+    entry.computed_crc32.update(&buffer[pos], count);
     pos += count;
     m_pos += count;
     m_data_pos += count;
 
     if (count == 0)
     {
-        m_current_entry++;
-        m_state = state::file_header;
+        m_buffer.reset();
+        m_state = state::data_descriptor;
     }
 }
 
 void stream::process_data_descriptor(char * buffer, size_t buffer_size, size_t & pos)
 {
+    auto & entry = m_entries.at(m_current_entry);
+    if (!entry.data_descriptor_needed())
+    {
+        m_current_entry++;
+        m_state = state::file_header;    
+        return;
+    }
 
+    if (m_buffer.empty())
+    {
+        m_buffer.write_u32(0x08074b50);
+        m_buffer.write_u32(entry.computed_crc32.get_value());
+        m_buffer.write_u32(entry.size());
+        m_buffer.write_u32(entry.size());
+    }
+
+    size_t const count = m_buffer.read(&buffer[pos], buffer_size - pos);
+    pos += count;
+    m_pos += count;
+
+    if (m_buffer.empty())
+    {
+        m_current_entry++;
+        m_state = state::file_header;    
+    }
 }
 
 void stream::process_toc_entry(char * buffer, size_t buffer_size, size_t & pos)
@@ -197,7 +227,7 @@ void stream::process_toc_entry(char * buffer, size_t buffer_size, size_t & pos)
         m_buffer.write_u16(0);                      // compression method (store)
         m_buffer.write_u16(0);                      // ToDo: last mod file time
         m_buffer.write_u16(0);                      // ToDo: last mod file date
-        m_buffer.write_u32(entry.crc32());          // crc32
+        m_buffer.write_u32(entry.computed_crc32.get_value());          // crc32
         m_buffer.write_u32(entry.size());           // compressed size
         m_buffer.write_u32(entry.size());           // uncompressed size
         m_buffer.write_u16(entry.name().size());    // filename length

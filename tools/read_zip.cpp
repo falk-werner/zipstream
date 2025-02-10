@@ -399,6 +399,7 @@ int main(int argc, char* argv[])
             local_file_header lfh;
             lfh.parse(zip, cfh.offset_of_local_header);
 
+            std::cout << "local file header:" << std::endl;
             std::cout << "  signature: 0x" << std::hex << lfh.signature << std::endl;
             std::cout << "  version needed to extract: " << std::dec << lfh.version_needed << std::endl;
             std::cout << "  general purpose bit flag: 0x" << std::hex << lfh.flags << std::endl;

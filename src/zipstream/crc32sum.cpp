@@ -59,7 +59,7 @@ void crc32sum::update(char const * buffer, size_t buffer_size)
 {
     unsigned char const * const buf = reinterpret_cast<unsigned char const *>(buffer);
 
-    value = 0 ^ 0xffffffff;
+    value = value ^ 0xffffffff;
 
     for(size_t i = 0; i < buffer_size; i++)
     {

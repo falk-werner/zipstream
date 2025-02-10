@@ -27,9 +27,7 @@ uint32_t file_entry::size() const
 
 std::optional<uint32_t> file_entry::crc32() const
 {
-    // return std::nullopt;
-    // ToDo: compute crc32 on the fly
-    return crc32sum::from_file(m_path);
+    return std::nullopt;
 }
 
 size_t file_entry::read_at(size_t offset, char * buffer, size_t buffer_size)
